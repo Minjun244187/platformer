@@ -11,8 +11,8 @@ import gamelogic.level.Level;
 import gamelogic.tiles.Tile;
 
 public class Player extends PhysicsObject{
-	public float walkSpeed = 400;
-	public float jumpPower = 1350;
+	public float walkSpeed = 240;
+	public float jumpPower = 1750;
 
 	private boolean isJumping = false;
 
@@ -28,11 +28,18 @@ public class Player extends PhysicsObject{
 		super.update(tslf);
 		
 		movementVector.x = 0;
+		movementVector.y = 0;
 		if(PlayerInput.isLeftKeyDown()) {
 			movementVector.x = -walkSpeed;
 		}
 		if(PlayerInput.isRightKeyDown()) {
 			movementVector.x = +walkSpeed;
+		}
+		if(PlayerInput.isUpKeyDown()) {
+			movementVector.y = -walkSpeed;
+		}
+		if(PlayerInput.isDownKeyDown()) {
+			movementVector.y = +walkSpeed;
 		}
 		if(PlayerInput.isJumpKeyDown() && !isJumping) {
 			movementVector.y = -jumpPower;
