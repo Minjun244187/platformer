@@ -196,6 +196,8 @@ public class Level {
 	//#############################################################################################################
 	//Your code goes here! 
 	//Please make sure you read the rubric/directions carefully and implement the solution recursively!
+	//precondition: col within the map's range, also with row, map properly declared, fullness between 0 and 3
+	//postcondition: runs the water accordingly to the directions given by Mr. Menchukov
 	private void water(int col, int row, Map map, int fullness) {
 		String name = "";
 		if (fullness == 3) {
