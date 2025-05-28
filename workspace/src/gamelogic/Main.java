@@ -46,7 +46,7 @@ public class Main extends GameBase implements PlayerDieListener, PlayerWinListen
 
 		levels = new LevelData[2];
 		try {
-			levels[0] = LeveldataLoader.loadLeveldata("/workspaces/platformer/workspace/maps/testMap.txt");
+			levels[0] = LeveldataLoader.loadLeveldata("/workspaces/platformer/workspace/maps/gasTest.txt");
 			levels[1] = LeveldataLoader.loadLeveldata("/workspaces/platformer/workspace/maps/map1.txt");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -90,7 +90,7 @@ public class Main extends GameBase implements PlayerDieListener, PlayerWinListen
 	public void onPlayerDeath() {
 		numberOfTries++;
 		levelStartTime = System.currentTimeMillis();
-		if(DEBUGGING) {
+		if(DEBUGGING && currentLevel.player.playerHP == 0) {
 			currentLevel.restartLevel();
 			levelCompleteBar = new LevelCompleteBar(100, 10, SCREEN_WIDTH - 200, 10, currentLevel.getPlayer());
 			return;

@@ -137,9 +137,12 @@ public class Level {
 	}
 
 	public void onPlayerDeath() {
-		active = false;
-		playerDead = true;
-		throwPlayerDieEvent();
+		if (player.playerHP == 0) {
+			active = false;
+			playerDead = true;
+			throwPlayerDieEvent();	
+		}
+		
 	}
 
 	public void onPlayerWin() {
@@ -180,6 +183,8 @@ public class Level {
 			for (int i = 0; i < enemies.length; i++) {
 				enemies[i].update(tslf);
 				if (player.getHitbox().isIntersecting(enemies[i].getHitbox())) {
+					player.playerHP -= 10;
+					player.bounce();
 					onPlayerDeath();
 				}
 			}
@@ -248,7 +253,8 @@ public class Level {
 		//right
 		
 	}
-
+	//precondition: col within the map's range, also with row, map properly declared, gas placed this round list is a new empty arraylist
+	//postcondition: runs the gas accordingly to the directions given by Mr. Menchukov
 	private void addGas(int col, int row, Map map, int numSquaresToFill, ArrayList<Gas> placedThisRound) {
 		String name = "GasOne";
 		int x = 0;
@@ -262,7 +268,7 @@ public class Level {
 		int index = 0;
 		
 
-		while (numSquaresToFill > 0 && placedThisRound.size() > 0) {
+		while (numSquaresToFill > 0 && placedThisRound.size() > 0 && placedThisRound.size() > index) {
 			
 			//breaky = true;
 			x = placedThisRound.get(index).getCol();
@@ -288,7 +294,7 @@ public class Level {
 				numSquaresToFill--;
 				//breaky = false;
 			}
-			if (x > 0 && !map.getTiles()[x - 1][y].isSolid() && !(map.getTiles()[x - 1][y] instanceof Gas)) {
+			if (x > 0 && !map.getTiles()[x - 1][y].isSolid() && !(map.getTiles()[x - 1][y] instanceof Gas) && numSquaresToFill > 0) {
 				g = new Gas (x - 1, y, tileSize, tileset.getImage(name), this, 0);
 				map.addTile(x - 1, y, g);
 				placedThisRound.add(g);

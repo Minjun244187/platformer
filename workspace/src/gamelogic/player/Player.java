@@ -13,6 +13,8 @@ import gamelogic.tiles.Tile;
 public class Player extends PhysicsObject{
 	public float walkSpeed = 240;
 	public float jumpPower = 1750;
+	public int playerHP = 100;
+	private String direction;
 
 	private boolean isJumping = false;
 
@@ -23,6 +25,10 @@ public class Player extends PhysicsObject{
 		this.hitbox = new RectHitbox(this, offset,offset, width -offset, height - offset);
 	}
 
+	public String getDirection() {
+		return direction;
+	}
+
 	@Override
 	public void update(float tslf) {
 		super.update(tslf);
@@ -31,15 +37,19 @@ public class Player extends PhysicsObject{
 		movementVector.y = 0;
 		if(PlayerInput.isLeftKeyDown()) {
 			movementVector.x = -walkSpeed;
+			direction = "west";
 		}
 		if(PlayerInput.isRightKeyDown()) {
 			movementVector.x = +walkSpeed;
+			direction = "east";
 		}
 		if(PlayerInput.isUpKeyDown()) {
 			movementVector.y = -walkSpeed;
+			direction = "north";
 		}
 		if(PlayerInput.isDownKeyDown()) {
 			movementVector.y = +walkSpeed;
+			direction = "south";
 		}
 		if(PlayerInput.isJumpKeyDown() && !isJumping) {
 			movementVector.y = -jumpPower;
@@ -48,6 +58,22 @@ public class Player extends PhysicsObject{
 		
 		isJumping = true;
 		if(collisionMatrix[BOT] != null) isJumping = false;
+	}
+	public void bounce() {
+		if (direction == "north") {
+			movementVector.y = +walkSpeed * 15;
+
+		} else if (direction == "south") {
+			movementVector.y = -walkSpeed * 15;
+
+		} else if (direction == "west") {
+			movementVector.x = +walkSpeed *15;
+
+		} else if (direction == "east") {
+			movementVector.x = -walkSpeed *15;
+
+		}
+		
 	}
 
 	@Override
