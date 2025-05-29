@@ -13,8 +13,19 @@ import gamelogic.tiles.Tile;
 public class Player extends PhysicsObject{
 	public float walkSpeed = 240;
 	public float jumpPower = 1750;
-	public int playerHP = 100;
+	public int playerHP = 1000;
 	private String direction;
+	private double purse = 0.0;
+	private int luck = 0;
+	private String job = "";
+	private String healthCondition = "";
+	public Inventory inventory = new Inventory(2);
+	public boolean inv;
+	public boolean stat;
+	private long lastInventoryToggleTime = 0;
+	private final long inventoryToggleCooldown = 200;
+	private long lastStatToggleTime = 0;
+	private final long statToggleCooldown = 350;
 
 	private boolean isJumping = false;
 
@@ -25,13 +36,57 @@ public class Player extends PhysicsObject{
 		this.hitbox = new RectHitbox(this, offset,offset, width -offset, height - offset);
 	}
 
+
+	//purse
+	public double getPurse() {
+		return purse;
+	}
+
+	public void changePurse(double amount) {
+		purse += amount;
+	}
+
+
+	//job/occupation
+	public String getJob() {
+		return job;
+	}
+
+	public int getLuck() {
+		return luck;
+	}
+
+	public void setJob(String job) {
+		this.job = job;
+	}
+
 	public String getDirection() {
 		return direction;
+	}
+
+	public Inventory getInventory() {
+        return inventory;
+    }
+
+
+	public String getCondition() {
+		if (playerHP > 800) {
+			return "Healthy";
+		} else if (playerHP > 600) {
+			return "Fine";
+		} else if (playerHP > 400) {
+			return "Unhealthy";
+		} else if (playerHP > 200) {
+			return "Critical";
+		} else {
+			return "Extreme";
+		}
 	}
 
 	@Override
 	public void update(float tslf) {
 		super.update(tslf);
+		long currentTime = System.currentTimeMillis();
 		
 		movementVector.x = 0;
 		movementVector.y = 0;
@@ -54,6 +109,24 @@ public class Player extends PhysicsObject{
 		if(PlayerInput.isJumpKeyDown() && !isJumping) {
 			movementVector.y = -jumpPower;
 			isJumping = true;
+		}
+		if(PlayerInput.isIKeyDown()) {
+			
+			if (currentTime - lastInventoryToggleTime >= inventoryToggleCooldown) {
+           		inv = !inv;
+            	lastInventoryToggleTime = currentTime;
+				System.out.println("i");
+			}
+
+		}
+		if(PlayerInput.isLKeyDown()) {
+			
+			if (currentTime - lastStatToggleTime >= statToggleCooldown) {
+           		stat = !stat;
+            	lastStatToggleTime = currentTime;
+				System.out.println("s");
+			}
+
 		}
 		
 		isJumping = true;

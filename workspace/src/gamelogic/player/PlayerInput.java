@@ -20,6 +20,14 @@ class PlayerInput {
 	public static boolean isJumpKeyDown() {
 		return KeyboardInputManager.isKeyDown(KeyEvent.VK_SPACE);
 	}
+
+	public static boolean isIKeyDown() {
+		return KeyboardInputManager.isKeyDown(KeyEvent.VK_I);
+	}
+
+	public static boolean isLKeyDown() {
+		return KeyboardInputManager.isKeyDown(KeyEvent.VK_L);
+	}
 	/**
 	 * 
 	 * @return true if the walk-left-key is down
