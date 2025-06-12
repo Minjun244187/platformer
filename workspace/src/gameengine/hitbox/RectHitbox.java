@@ -44,7 +44,7 @@ public class RectHitbox extends Hitbox{
 	@Override
 	public void draw(Graphics g) {
 		if(!SHOW_HITBOXES) return;
-		g.setColor(Color.GREEN);
+		g.setColor(Color.BLUE);
 		g.drawRect((int)position.x, (int)position.y, width, height);
 	}
 

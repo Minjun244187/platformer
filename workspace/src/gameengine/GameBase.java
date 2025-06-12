@@ -1,6 +1,3 @@
-/*
- * 
- */
 package gameengine;
 
 import java.awt.Graphics;
@@ -9,65 +6,82 @@ import java.awt.image.BufferStrategy;
 import gameengine.graphics.MyWindow;
 import gameengine.input.KeyboardInputManager;
 import gameengine.input.MouseInputManager;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent; // Ensure this import is here
 
-/**
- * 
- * @author Paul Kappmeyer & Daniel Lucarz
- *
- */
 public abstract class GameBase{
 	protected MyWindow window;
+	protected MouseInputManager mouseInputManager;
 
-	//-----------------------------------------------ABSTRACT METHODS FOR SUB-CLASS
 	public abstract void init();
 	public abstract void update(float tslf);
 	public abstract void draw(Graphics graphics);
-	//-----------------------------------------------END ABSTRACT METHODS
 
-	/**
-	 * Creates a new window and starts the game loop
-	 * @param title The title of the window
-	 * @param width The width of the window
-	 * @param height The height of the window
-	 */
 	public void start(String title, int width, int height) {
 		window = new MyWindow(title, width, height);
 
-		//Adding inputManagers to window
-		window.addKeyListener(new KeyboardInputManager());
-		MouseInputManager mouseInputManager = new MouseInputManager(window);
-		window.addMouseListener(mouseInputManager);
-		window.addMouseMotionListener(mouseInputManager);
-		window.addMouseWheelListener(mouseInputManager);
-		
+		window.addKeyListener(KeyboardInputManager.getInstance());
+
+		this.mouseInputManager = new MouseInputManager(window);
+		window.addMouseListener(this.mouseInputManager);
+		window.addMouseMotionListener(this.mouseInputManager);
+		window.addMouseWheelListener(this.mouseInputManager);
+
+		window.setFocusable(true);
+		window.requestFocusInWindow();
+
 		long StartOfInit = System.currentTimeMillis();
-		init(); //Calling method init() in the sub-class
+		init();
 		long StartOfGame = System.currentTimeMillis();
 		System.out.println("Time needed for initialization: [" + (StartOfGame - StartOfInit) + "ms]");
-		
+
 		long lastFrame = System.currentTimeMillis();
 
 		while(true) {
 			lastFrame = System.currentTimeMillis();
-			while(window.isActive()) {
-				//Calculating time since last frame
+			while(window.isShowing()) {
 				long thisFrame = System.currentTimeMillis();
 				float tslf = (float)(thisFrame - lastFrame) / 1000f;
 				lastFrame = thisFrame;
 
-				update(tslf); //Calling method update() in the sub-class 
+				// --- Input Processing Order ---
+				KeyboardInputManager.update();
+				this.mouseInputManager.update(); // Call update (now empty)
+
+				// Current frame state checks (Main.update() is called here)
+				//System.out.println("FRAME: " + System.currentTimeMillis() + "ms - START of frame (before Main.update())");
+				//System.out.println("  Raw mousebutton[1]: " + MouseInputManager.isButtonDown(MouseEvent.BUTTON1));
+				// Removed prevMousebutton print as it's no longer used for justPressed
+				//System.out.println("  isButtonJustPressed[1]: " + MouseInputManager.isButtonJustPressed(MouseEvent.BUTTON1));
+
+				update(tslf); // Calling Main.update()
+
+				//System.out.println("FRAME: " + System.currentTimeMillis() + "ms - END of frame (after Main.update())");
+				//System.out.println("  Raw mousebutton[1]: " + MouseInputManager.isButtonDown(MouseEvent.BUTTON1));
+				//System.out.println("  isButtonJustPressed[1]: " + MouseInputManager.isButtonJustPressed(MouseEvent.BUTTON1)); // Will be true if it was just pressed
+
+				// --- Drawing ---
 				BufferStrategy bs = window.beginDrawing();
 				do{
 					do{
 						Graphics g = bs.getDrawGraphics();
 						g.translate(window.getInsetX(), window.getInsetY());
-						draw(g); //Calling method draw() in the sub-class
+						draw(g);
 						g.dispose();
 					}while(bs.contentsLost());
 					bs.show();
 				}while(bs.contentsLost());
-				
+
+				// NEW: Clear justPressed flags at the very end of the frame
+				// This ensures isButtonJustPressed is true for one full frame before being reset.
+			}
+			if (!window.isShowing()) {
+				System.exit(0);
 			}
 		}
+	}
+
+	public MouseInputManager getMouseInputManager() {
+		return this.mouseInputManager;
 	}
 }

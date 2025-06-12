@@ -38,7 +38,8 @@ public class MyWindow extends JFrame {
 		insetY = i.top;
 		this.setResizable(false);
 		this.setSize(width + insetX + i.right, height + insetY + i.bottom);
-		
+
+
 
 	}
 	

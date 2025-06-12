@@ -16,7 +16,13 @@ public class Tile{
 	protected BufferedImage image;
 	protected boolean solid;
 	protected Level level;
-	
+
+	public Tile(BufferedImage image, boolean solid) {
+
+		this.image = image;
+		this.solid = solid;
+	}
+
 	public Tile(float x, float y, int size, BufferedImage image, boolean solid, Level level) {
 		this.position = new Vector2D(x*size, y*size);
 		this.size = size;

@@ -52,4 +52,8 @@ class PlayerInput {
 	public static boolean isDownKeyDown() {
 		return KeyboardInputManager.isKeyDown(KeyEvent.VK_S) || KeyboardInputManager.isKeyDown(KeyEvent.VK_DOWN);
 	}
+
+    public static boolean isZKeyDown() {
+		return KeyboardInputManager.isKeyDown(KeyEvent.VK_Z) || KeyboardInputManager.isKeyDown(KeyEvent.VK_ENTER);
+    }
 }

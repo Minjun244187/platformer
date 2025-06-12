@@ -3,7 +3,12 @@ package gameengine;
 import gameengine.hitbox.RectHitbox;
 import gameengine.maths.Vector2D;
 import gamelogic.level.Level;
+import gamelogic.tiles.DummyTile;
 import gamelogic.tiles.Tile;
+import gamelogic.world.Building;
+import gamelogic.world.ShopNPC;
+
+import static gamelogic.level.Level.player;
 
 public class PhysicsObject extends GameObject{
 	//Used for collision
@@ -20,7 +25,8 @@ public class PhysicsObject extends GameObject{
 	protected Tile[] closestMatrix;
 
 	private Level level;
-	
+
+
 	public PhysicsObject(float x, float y, int width, int height, Level level) {
 		super(x, y, width, height);
 		this.level = level;
@@ -59,10 +65,14 @@ public class PhysicsObject extends GameObject{
 			movementVector.x = 0;
 		}
 
+
+
 		position.x += movementVector.x * tslf;
 		position.y += movementVector.y * tslf;
-		
+
 		hitbox.update(); // -> saving old position
+
+
 	}
 
 	public void updateCollisionMatrix(float tslf) {
@@ -128,6 +138,100 @@ public class PhysicsObject extends GameObject{
 				}
 			}
 		}
+		for (Building building : level.getBuildings()) {
+			if (building == null || !building.isCollidable()) continue;
+
+			RectHitbox obstacle = building.getHitbox();
+			if (obstacle == null) continue;
+
+			float tileLeftSide = obstacle.getX();
+			float tileRightSide = obstacle.getX() + obstacle.getWidth();
+			float tileTopSide = obstacle.getY();
+			float tileBotSide = obstacle.getY() + obstacle.getHeight();
+
+			// Bottom
+			if (leftSide < tileRightSide && rightSide > tileLeftSide && botSide <= tileTopSide) {
+				if (tileTopSide - botSide < closestBot) {
+					bot = new DummyTile(building.getHitbox());  // Wrap in a fake Tile or custom logic
+					closestBot = tileTopSide - botSide;
+				}
+			}
+			// Top
+			if (leftSide < tileRightSide && rightSide > tileLeftSide && topSide >= tileBotSide) {
+				if (topSide - tileBotSide < closestTop) {
+					top = new DummyTile(building.getHitbox());
+					closestTop = topSide - tileBotSide;
+				}
+			}
+			// Right
+			if (topSide < tileBotSide && botSide > tileTopSide && rightSide <= tileLeftSide) {
+				if (tileLeftSide - rightSide < closestRig) {
+					rig = new DummyTile(building.getHitbox());
+					closestRig = tileLeftSide - rightSide;
+				}
+			}
+			// Left
+			if (topSide < tileBotSide && botSide > tileTopSide && leftSide >= tileRightSide) {
+				if (leftSide - tileRightSide < closestLef) {
+					lef = new DummyTile(building.getHitbox());
+					closestLef = leftSide - tileRightSide;
+				}
+			}
+		}
+		for (ShopNPC npc : level.getShopNPCs()) {
+			// Check if the NPC is considered solid/collidable
+			if (!npc.isSolid() && !npc.isCollidable()) {
+				continue; // Skip if it's not meant to be a physical obstacle
+			}
+
+			RectHitbox obstacle = npc.getHitbox();
+			if (obstacle == null) continue; // Should not happen if hitbox is always initialized
+
+			// Position of NPC's hitbox
+			float npcLeftSide = obstacle.getX();
+			float npcRightSide = obstacle.getX() + obstacle.getWidth();
+			float npcTopSide = obstacle.getY();
+			float npcBotSide = obstacle.getY() + obstacle.getHeight();
+
+			// Find closest obstacle below player
+			// Check if horizontal overlap exists and object is below
+			if(rightSide > npcLeftSide && leftSide < npcRightSide && botSide <= npcTopSide) {
+				// When current bottom side of player is above top side of obstacle
+				if(npcTopSide - botSide < closestBot) {
+					// When the top side of the obstacle is closer to the bottom side of the player
+					// You might need to wrap the NPC's hitbox in a DummyTile
+					bot = new DummyTile(obstacle);
+					closestBot = npcTopSide - botSide;
+				}
+			}
+			// Find closest obstacle above player
+			// Check if horizontal overlap exists and object is above
+			if(rightSide > npcLeftSide && leftSide < npcRightSide && topSide >= npcBotSide) {
+				// When current top side of player is below bottom side of obstacle
+				if(topSide - npcBotSide < closestTop) {
+					top = new DummyTile(obstacle);
+					closestTop = topSide - npcBotSide;
+				}
+			}
+			// Find closest obstacle right to the player
+			// Check if vertical overlap exists and object is to the right
+			if(botSide > npcTopSide && topSide < npcBotSide && rightSide <= npcLeftSide) {
+				// When current right side of player is left to left side of obstacle
+				if(npcLeftSide - rightSide < closestRig) {
+					rig = new DummyTile(obstacle);
+					closestRig = npcLeftSide - rightSide;
+				}
+			}
+			// Find closest obstacle left to the player
+			// Check if vertical overlap exists and object is to the left
+			if(botSide > npcTopSide && topSide < npcBotSide && leftSide >= npcRightSide) {
+				// When current left side of player is right to right side of obstacle
+				if(leftSide - npcRightSide < closestLef) {
+					lef = new DummyTile(obstacle);
+					closestLef = leftSide - npcRightSide;
+				}
+			}
+		}
 		//Save closest as options
 		closestMatrix[BOT] = bot;
 		closestMatrix[TOP] = top;
@@ -137,25 +241,25 @@ public class PhysicsObject extends GameObject{
 		//Fill Matrix when collision really is detected
 		Tile[] matrix = new Tile[4];
 		if(bot != null) {
-			if(newPositon.y + (hitbox.getOffsetY() + hitbox.getHeight()) > bot.getHitbox().getY()) {
+			if(newPositon.y + (hitbox.getOffsetY() + hitbox.getHeight()) >= bot.getHitbox().getY()) {
 				//When new bottom side of player is below top side of obstacle
 				matrix[BOT] = bot;
 			}
 		}
 		if(top != null) {
-			if(newPositon.y + hitbox.getOffsetY() < top.getHitbox().getY() + top.getHitbox().getHeight()) {
+			if(newPositon.y + hitbox.getOffsetY() <= top.getHitbox().getY() + top.getHitbox().getHeight()) {
 				//When new top side of player is above bottom side of obstacle
 				matrix[TOP] = top;
 			}
 		}
 		if(lef != null) {
-			if(newPositon.x + hitbox.getOffsetX() < lef.getHitbox().getX() + lef.getHitbox().getWidth()) {
+			if(newPositon.x + hitbox.getOffsetX() <= lef.getHitbox().getX() + lef.getHitbox().getWidth()) {
 				//When new left side of player is left to right side of obstacle
 				matrix[LEF] = lef;
 			}
 		}
 		if(rig != null) {
-			if(newPositon.x + (hitbox.getOffsetX() + hitbox.getWidth()) > rig.getHitbox().getX()) {
+			if(newPositon.x + (hitbox.getOffsetX() + hitbox.getWidth()) >= rig.getHitbox().getX()) {
 				//When new right side of player is right to left side of obstacle
 				matrix[RIG] = rig;
 			}
