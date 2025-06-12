@@ -69,7 +69,7 @@ public final class GameResources {
 
 	public static void load() {
 		try {
-			// Existing loads - Corrected paths to use forward slashes and no leading '.\'
+			// Existing loads - Corrected paths to use forward slashes and no leading '.\' /workspaces/platformer/workspace/src/gfx/tileset.png
 			tileset = TilesetLoader.loadTileset("gfx/tileset.txt", ImageLoader.loadImage("gfx/tileset.png"));
 			enemy = ImageLoader.loadImage("gfx/Enemy.png");
 			logo = ImageLoader.loadImage("gfx/ui/logo.png");

@@ -23,6 +23,7 @@ public final class ImageLoader {
 	 */
 	public static BufferedImage loadImage(String path) throws Exception {
 		// Use ClassLoader to read the resource from the classpath (works when packaged in a JAR)
+		
 		InputStream inputStream = ImageLoader.class.getClassLoader().getResourceAsStream(path);
 
 		if (inputStream == null) {
